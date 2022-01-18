@@ -45,9 +45,7 @@ clean:
 	cd examples && ((rm -rf terraform.tfstate.backup) || echo '')
 
 test_clean: clean install
-	export TF_LOG=TRACE
 	cd examples && terraform apply -auto-approve
 
 test: install
-	export TF_LOG=TRACE
 	cd examples && terraform apply -auto-approve

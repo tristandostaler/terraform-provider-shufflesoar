@@ -14,6 +14,7 @@ A terraform provider for https://github.com/frikky/Shuffle
 - Then:
 ```
 export TF_VAR_shuffle_api_token=YOURTOKEN
+export TF_LOG=TRACE
 sudo mkdir -p /usr/share/terraform/providers
 sudo chmod -R 777 /usr/share/terraform/providers
 make
