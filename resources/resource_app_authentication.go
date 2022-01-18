@@ -7,7 +7,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/tristandostaler/shufflesoar/client"
+	"github.com/tristandostaler/terraform-provider-shufflesoar/client"
 )
 
 func randomHex(n int) (string, error) {

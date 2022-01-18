@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
-	"github.com/tristandostaler/shufflesoar/client"
-	"github.com/tristandostaler/shufflesoar/resources"
+	"github.com/tristandostaler/terraform-provider-shufflesoar/client"
+	"github.com/tristandostaler/terraform-provider-shufflesoar/resources"
 )
 
 func Provider() *schema.Provider {

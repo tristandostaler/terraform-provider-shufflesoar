@@ -1,4 +1,4 @@
-module github.com/tristandostaler/shufflesoar
+module github.com/tristandostaler/terraform-provider-shufflesoar
 
 go 1.16
 
