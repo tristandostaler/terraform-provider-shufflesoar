@@ -67,8 +67,9 @@ func createAppObj(d *schema.ResourceData) (client.App, error) {
 
 	app := client.App{
 		App: client.AppAuthentication{
-			Name: d.Get("name").(string),
-			Id:   appId,
+			Name:       d.Get("name").(string),
+			Id:         appId,
+			LargeImage: d.Get("large_image").(string),
 		},
 		Fields: []client.Field{},
 		Label:  d.Get("label").(string),
