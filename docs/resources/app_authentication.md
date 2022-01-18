@@ -3,7 +3,7 @@
 page_title: "shufflesoar_app_authentication Resource - shufflesoar"
 subcategory: ""
 description: |-
-  A resource to create an app authentication in shuffle
+  
 ---
 
 # shufflesoar_app_authentication (Resource)
@@ -20,11 +20,10 @@ description: |-
 - **fields** (String) This is a json map of all the required fields for this app authentication. The name of the fields must match the names in the authentication parameters and there must be the same number of parameters and fields.
 - **label** (String) The text to display in the Shuffle UI
 - **name** (String) The App name to link this authentication config to. This must match an existing App's name
-- **shuffle_api_token** (String) Shuffle's API token
 
 ### Optional
 
-- **app_id** (String) A unique ID for the app
+- **app_id** (String) The App Id of the App to link this authentication config to
 - **id** (String) The ID of this resource.
 - **large_image** (String) The base64 string for the image to display. Format: data:image/png;base64,THE_BASE64
 
