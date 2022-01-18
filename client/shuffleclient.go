@@ -81,6 +81,16 @@ type App struct {
 	Active bool
 }
 
+type GetAppResponse struct {
+	Data    []App
+	Success bool
+}
+
+type CreateOrUpdateResponse struct {
+	Success bool
+	Id      string
+}
+
 func NewShuffleClient(apiToken string) (*ShuffleClient, error) {
 	return &ShuffleClient{
 		Url:      "https://shuffler.io/api/v1/apps/authentication",
@@ -89,82 +99,86 @@ func NewShuffleClient(apiToken string) (*ShuffleClient, error) {
 }
 
 func (c *ShuffleClient) CreateOrUpdateAppAuth(app App) (string, error) {
-	// initialize http client
-	client := &http.Client{}
-
 	// marshal User to json
 	jsonData, err := json.Marshal(app)
 	if err != nil {
 		return "", err
 	}
-
-	// set the HTTP method, url, and request body
-	req, err := http.NewRequest(http.MethodPut, c.Url, bytes.NewBuffer(jsonData))
-	if err != nil {
-		return "", err
-	}
-	defer req.Body.Close()
-
-	// set the request header Content-Type for json
-	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	req.Header.Set("Authorization", "Bearer "+c.APIToken)
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
+	body, statusCode, err := c.makeRequest(http.MethodDelete, c.Url, jsonData)
 	if err != nil {
 		return "", err
 	}
 
-	var responseJson map[string]interface{}
+	var responseJson CreateOrUpdateResponse
 	if err := json.Unmarshal([]byte(body), &responseJson); err != nil {
 		log.Printf("[WARN] Failed to unmarshal on read: %+v", body)
 		return "", err
 	}
 
-	log.Printf("[INFO] Create or Update Response: %d %s", resp.StatusCode, string(body))
+	if !responseJson.Success {
+		log.Printf("[WARN] Failed to add app auth: %+v", body)
+		return "", fmt.Errorf("[WARN] Failed to add app auth: %+v", body)
+	}
 
-	return responseJson["id"].(string), nil
+	log.Printf("[INFO] Create or Update Response: %d %s", statusCode, string(body))
+
+	return responseJson.Id, nil
 }
 
 func (c *ShuffleClient) DeleteAppAuth(id string) error {
-	client := &http.Client{}
-
-	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/%s", c.Url, id), nil)
+	body, statusCode, err := c.makeRequest(http.MethodDelete, fmt.Sprintf("%s/%s", c.Url, id), nil)
 	if err != nil {
 		return err
 	}
 
-	// set the request header Content-Type for json
-	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	req.Header.Set("Authorization", "Bearer "+c.APIToken)
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	log.Printf("[INFO] Delete Response: %d %s", resp.StatusCode, string(body))
+	log.Printf("[INFO] Delete Response: %d %s", statusCode, string(body))
 
 	return nil
 }
 
 func (c *ShuffleClient) GetAppAuth(id string) (App, error) {
-	client := &http.Client{}
-
-	req, err := http.NewRequest(http.MethodGet, c.Url, nil)
+	body, _, err := c.makeRequest(http.MethodGet, c.Url, nil)
 	if err != nil {
 		return App{}, err
+	}
+
+	var responseJson GetAppResponse
+	if err := json.Unmarshal([]byte(body), &responseJson); err != nil {
+		log.Printf("[WARN] Failed to unmarshal on read: %+v", body)
+		return App{}, err
+	}
+
+	apps := responseJson.Data
+
+	for _, app := range apps {
+		if app.Id != id {
+			log.Printf("[WARN] App %s not matching %s", app.Id, id)
+			continue
+		}
+
+		return app, nil
+	}
+
+	return App{}, fmt.Errorf("App (%s) not found", id)
+}
+
+func (c *ShuffleClient) makeRequest(method string, url string, body []byte) ([]byte, int, error) {
+	client := &http.Client{}
+	var req *http.Request
+	var err error
+
+	if body == nil {
+		req, err = http.NewRequest(method, url, nil)
+	} else {
+		// set the HTTP method, url, and request body
+		req, err = http.NewRequest(http.MethodPut, url, bytes.NewBuffer(body))
+		if err != nil {
+			defer req.Body.Close()
+		}
+	}
+
+	if err != nil {
+		return nil, -1, err
 	}
 
 	// set the request header Content-Type for json
@@ -173,50 +187,13 @@ func (c *ShuffleClient) GetAppAuth(id string) (App, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return App{}, err
+		return nil, -1, err
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	rbody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return App{}, err
+		return nil, -1, err
 	}
 
-	var responseJson map[string]interface{}
-	if err := json.Unmarshal([]byte(body), &responseJson); err != nil {
-		log.Printf("[WARN] Failed to unmarshal on read: %+v", body)
-		return App{}, err
-	}
-
-	apps, ok := responseJson["data"].([]interface{})
-	if !ok {
-		log.Printf("[ERROR] expected %T to be an array of object", responseJson["data"])
-		return App{}, fmt.Errorf("expected %T to be an array of object", responseJson["data"])
-	}
-
-	for _, app := range apps {
-		if app.(map[string]interface{})["id"].(string) != id {
-			log.Printf("[WARN] App %s not matching %s", app.(map[string]interface{})["id"].(string), id)
-			continue
-		}
-		appObject := App{
-			App: AppAuthentication{
-				Name:       app.(map[string]interface{})["app"].(map[string]interface{})["name"].(string),
-				Id:         app.(map[string]interface{})["app"].(map[string]interface{})["id"].(string),
-				LargeImage: app.(map[string]interface{})["app"].(map[string]interface{})["large_image"].(string),
-			},
-			Fields: []Field{},
-			Label:  app.(map[string]interface{})["label"].(string),
-			Id:     id,
-			Active: app.(map[string]interface{})["active"].(bool),
-		}
-
-		fields := app.(map[string]interface{})["fields"].([]interface{})
-		for _, field := range fields {
-			appObject.Fields = append(appObject.Fields, Field{Key: field.(map[string]interface{})["key"].(string), Value: field.(map[string]interface{})["value"].(string)})
-		}
-
-		return appObject, nil
-	}
-
-	return App{}, fmt.Errorf("App (%s) not found", id)
+	return rbody, resp.StatusCode, nil
 }

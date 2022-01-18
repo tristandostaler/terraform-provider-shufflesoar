@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tristandostaler/terraform-provider-shufflesoar/client"
 )
 
@@ -76,16 +76,14 @@ func createAppObj(d *schema.ResourceData) (client.App, error) {
 		Active: true,
 	}
 
-	var fields []map[string]string
+	var fields []client.Field
 	fieldsString := d.Get("fields").(string)
 	if err := json.Unmarshal([]byte(fieldsString), &fields); err != nil {
 		log.Printf("[WARN] Failed to unmarshal on read: %+v", fieldsString)
 		return client.App{}, err
 	}
 
-	for _, field := range fields {
-		app.Fields = append(app.Fields, client.Field{Key: field["key"], Value: field["value"]})
-	}
+	app.Fields = fields
 
 	return app, nil
 }

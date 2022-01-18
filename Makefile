@@ -39,13 +39,20 @@ testacc:
 	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m
 
 clean:
+	cd examples && ((terraform apply -destroy -auto-approve) || echo '')
 	cd examples && ((rm -rf .terraform) || echo '')
 	cd examples && ((rm -rf .terraform.lock.hcl) || echo '')
 	cd examples && ((rm -rf terraform.tfstate) || echo '')
 	cd examples && ((rm -rf terraform.tfstate.backup) || echo '')
+	((rm terraform-provider-shufflesoar) || echo '')
 
 test_clean: clean install
 	cd examples && terraform apply -auto-approve
 
 test: install
 	cd examples && terraform apply -auto-approve
+
+doc: build
+	go get github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
+	go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
+	((rm terraform-provider-shufflesoar) || echo '')
