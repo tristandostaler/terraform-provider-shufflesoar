@@ -3,11 +3,11 @@ package resources
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"encoding/json"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tristandostaler/terraform-provider-shufflesoar/client"
+	"github.com/tristandostaler/terraform-provider-shufflesoar/utils"
 )
 
 func randomHex(n int) (string, error) {
@@ -19,71 +19,63 @@ func randomHex(n int) (string, error) {
 }
 
 func ResourceAppAuthentication() *schema.Resource {
-	return &schema.Resource{
+	r := &schema.Resource{
 		Create: resourceAppAuthenticationCreate,
 		Read:   resourceAppAuthenticationRead,
 		Update: resourceAppAuthenticationUpdate,
 		Delete: resourceAppAuthenticationDelete,
 
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The App name to link this authentication config to. This must match an existing App's name",
-			},
-			"app_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "",
-				Description: "The App Id of the App to link this authentication config to",
-			},
-			"large_image": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "",
-				Description: "The base64 string for the image to display. Format: data:image/png;base64,THE_BASE64",
-			},
-			"fields": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "This is a json map of all the required fields for this app authentication. The name of the fields must match the names in the authentication parameters and there must be the same number of parameters and fields.",
-			},
-			"label": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The text to display in the Shuffle UI",
-			},
-		},
+		Schema: client.GetDefaultAppSchema().Schema,
 	}
+
+	r = utils.RecurseSetSchemaStatus(r, utils.Optional, true)
+
+	r = utils.RecurseSetSchemaStatusByKey(r, "id", utils.Computed, true)
+	r = utils.RecurseSetSchemaStatusByKey(r, "label", utils.Required, true)
+	r = utils.RecurseSetSchemaStatusByKey(r, "app.name", utils.Required, true)
+	r = utils.RecurseSetSchemaStatusByKey(r, "fields.key", utils.Required, true)
+	r = utils.RecurseSetSchemaStatusByKey(r, "fields.value", utils.Required, true)
+
+	r.Schema["app"].MinItems = 1
+	r.Schema["app"].MaxItems = 1
+
+	return r
+}
+
+func getAppAuthFromResourceData(d *schema.ResourceData) map[string]interface{} {
+	return d.Get("app").([]interface{})[0].(map[string]interface{})
 }
 
 func createAppObj(d *schema.ResourceData) (client.App, error) {
-	appId := d.Get("app_id").(string)
-	if appId == "" {
-		appId, _ = randomHex(16)
-		d.Set("app_id", appId)
+	appAuth := getAppAuthFromResourceData(d)
+	appAuthId := appAuth["id"].(string)
+	if appAuthId == "" {
+		appAuthId, _ = randomHex(16)
+		appAuth["id"] = appAuthId
+		temp := make([]interface{}, 1)
+		temp[0] = appAuth
+		d.Set("app", temp)
 	}
-	log.Printf("[INFO] app_id: %s", appId)
+	log.Printf("[INFO] appAuthId: %s", appAuthId)
 
 	app := client.App{
 		App: client.AppAuthentication{
-			Name:       d.Get("name").(string),
-			Id:         appId,
-			LargeImage: d.Get("large_image").(string),
+			Name:       appAuth["name"].(string),
+			Id:         appAuthId,
+			LargeImage: appAuth["large_image"].(string),
 		},
 		Fields: []client.Field{},
 		Label:  d.Get("label").(string),
 		Active: true,
 	}
 
-	var fields []client.Field
-	fieldsString := d.Get("fields").(string)
-	if err := json.Unmarshal([]byte(fieldsString), &fields); err != nil {
-		log.Printf("[WARN] Failed to unmarshal on read: %+v", fieldsString)
-		return client.App{}, err
+	fieldsResources := d.Get("fields").([]interface{})
+	for _, fr := range fieldsResources {
+		app.Fields = append(app.Fields, client.Field{
+			Key:   fr.(map[string]interface{})["key"].(string),
+			Value: fr.(map[string]interface{})["value"].(string),
+		})
 	}
-
-	app.Fields = fields
 
 	return app, nil
 }
@@ -111,23 +103,31 @@ func resourceAppAuthenticationRead(d *schema.ResourceData, m interface{}) error 
 
 	c := m.(*client.ShuffleClient)
 
-	app, err := c.GetAppAuth(id)
+	app, err := c.GetAppAuthById(id)
 	if err != nil {
 		log.Printf("[WARN] App (%s) not found, removing from state", id)
 		d.SetId("")
 		return nil
 	}
 
-	jsonData, err := json.Marshal(app.Fields)
-	if err != nil {
-		return err
+	appAuth := make([]map[string]interface{}, 1)
+	appAuth[0] = make(map[string]interface{})
+	appAuth[0]["id"] = app.App.Id
+	appAuth[0]["name"] = app.App.Name
+	appAuth[0]["large_image"] = app.App.LargeImage
+
+	fields := make([]map[string]interface{}, len(app.Fields))
+	for _, f := range app.Fields {
+		f1 := make(map[string]interface{})
+		f1["key"] = f.Key
+		f1["value"] = f.Value
+		fields = append(fields, f1)
 	}
 
-	d.Set("app_id", app.App.Id)
+	d.Set("app", appAuth)
 	d.Set("name", app.App.Name)
 	d.Set("label", app.Label)
-	d.Set("fields", string(jsonData))
-	d.Set("large_image", app.App.LargeImage)
+	d.Set("fields", fields)
 
 	return nil
 }

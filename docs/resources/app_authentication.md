@@ -15,22 +15,27 @@ A resource to create Shuffle App Authentication. See "App Authentication" in: ht
 
 ```terraform
 resource "shufflesoar_app_authentication" "example" {
-  name        = "AWS ses"
-  label       = "A test app"
-  large_image = "data:image/png;base64,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"
-  fields      = <<EOF
-[{
-    "key": "access_key",
-    "value": "1234"
-}, {
-    "key": "secret_key",
-    "value": "1234"
-}, {
-    "key": "region",
-    "value": "1234"
-}]
-EOF
+  app {
+    name        = "AWS ses"
+    large_image = "data:image/png;base64,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"
+  }
 
+  label = "A test app"
+
+  fields {
+    key   = "access_key"
+    value = "1234"
+  }
+
+  fields {
+    key   = "secret_key"
+    value = "1234"
+  }
+
+  fields {
+    key   = "region"
+    value = "1234"
+  }
 }
 ```
 
@@ -39,12 +44,163 @@ EOF
 
 ### Required
 
-- **fields** (String) This is a json map of all the required fields for this app authentication. The name of the fields must match the names in the authentication parameters and there must be the same number of parameters and fields.
+- **app** (Block List, Min: 1, Max: 1) A block for the app authentication settings (see [below for nested schema](#nestedblock--app))
+- **fields** (Block List, Min: 1) This is a list of all the required fields for this app authentication. The name of the fields must match the names in the authentication parameters and there must be the same number of parameters and fields. (see [below for nested schema](#nestedblock--fields))
 - **label** (String) The text to display in the Shuffle UI
-- **name** (String) The App name to link this authentication config to. This must match an existing App's name
 
 ### Optional
 
-- **app_id** (String) The App Id of the App to link this authentication config to Defaults to ``.
+- **active** (Boolean)
+- **created** (Number)
+- **defined** (Boolean)
+- **edited** (Number)
+- **encrypted** (Boolean)
+- **node_count** (Number)
+- **org_id** (String)
+- **referenceworkflow** (String)
+- **type** (String)
+- **usage** (Block List) (see [below for nested schema](#nestedblock--usage))
+- **workflow_count** (Number)
+
+### Read-Only
+
 - **id** (String) The ID of this resource.
-- **large_image** (String) The base64 string for the image to display. Format: data:image/png;base64,THE_BASE64 Defaults to ``.
+
+<a id="nestedblock--app"></a>
+### Nested Schema for `app`
+
+Required:
+
+- **name** (String) The App name to link this authentication config to. This must match an existing App's name
+
+Optional:
+
+- **action_file_path** (String)
+- **activated** (Boolean)
+- **app_version** (String)
+- **authentication** (Block List) (see [below for nested schema](#nestedblock--app--authentication))
+- **categories** (String)
+- **contact_info** (Block List) (see [below for nested schema](#nestedblock--app--contact_info))
+- **created** (Number)
+- **description** (String)
+- **documentation** (String)
+- **downloaded** (Boolean)
+- **edited** (Number)
+- **environment** (String)
+- **folder_mount** (Block List) (see [below for nested schema](#nestedblock--app--folder_mount))
+- **generated** (Boolean)
+- **hash** (String)
+- **id** (String) The App Id of the App to link this authentication config to
+- **invalid** (Boolean)
+- **is_valid** (Boolean)
+- **large_image** (String) The base64 string for the image to display. Format: data:image/png;base64,THE_BASE64
+- **last_runtime** (Number)
+- **link** (String)
+- **loop_versions** (String)
+- **owner** (String)
+- **private_id** (String)
+- **public** (Boolean)
+- **reference_info** (Block List) (see [below for nested schema](#nestedblock--app--reference_info))
+- **reference_org** (String)
+- **reference_url** (String)
+- **sharing** (Boolean)
+- **sharing_config** (String)
+- **small_image** (String)
+- **tags** (String)
+- **tested** (Boolean)
+- **verified** (Boolean)
+- **versions** (Block List) (see [below for nested schema](#nestedblock--app--versions))
+
+<a id="nestedblock--app--authentication"></a>
+### Nested Schema for `app.authentication`
+
+Optional:
+
+- **client_id** (String)
+- **client_secret** (String)
+- **parameters** (Block List) (see [below for nested schema](#nestedblock--app--authentication--parameters))
+- **redirect_uri** (String)
+- **refresh_uri** (String)
+- **required** (Boolean)
+- **token_uri** (String)
+- **type** (String)
+
+<a id="nestedblock--app--authentication--parameters"></a>
+### Nested Schema for `app.authentication.parameters`
+
+Optional:
+
+- **description** (String)
+- **example** (String)
+- **id** (String) The ID of this resource.
+- **in** (String)
+- **multiline** (Boolean)
+- **name** (String)
+- **required** (Boolean)
+- **schema** (Block List) (see [below for nested schema](#nestedblock--app--authentication--parameters--schema))
+- **scheme** (String)
+
+<a id="nestedblock--app--authentication--parameters--schema"></a>
+### Nested Schema for `app.authentication.parameters.scheme`
+
+Optional:
+
+- **type** (String)
+
+
+
+
+<a id="nestedblock--app--contact_info"></a>
+### Nested Schema for `app.contact_info`
+
+Optional:
+
+- **name** (String)
+- **url** (String)
+
+
+<a id="nestedblock--app--folder_mount"></a>
+### Nested Schema for `app.folder_mount`
+
+Optional:
+
+- **destination_folder** (String)
+- **folder_mount** (Boolean)
+- **source_folder** (String)
+
+
+<a id="nestedblock--app--reference_info"></a>
+### Nested Schema for `app.reference_info`
+
+Optional:
+
+- **documentation_url** (String)
+- **github_url** (String)
+
+
+<a id="nestedblock--app--versions"></a>
+### Nested Schema for `app.versions`
+
+Optional:
+
+- **id** (String) The ID of this resource.
+- **version** (String)
+
+
+
+<a id="nestedblock--fields"></a>
+### Nested Schema for `fields`
+
+Required:
+
+- **key** (String)
+- **value** (String)
+
+
+<a id="nestedblock--usage"></a>
+### Nested Schema for `usage`
+
+Optional:
+
+- **nodes** (List of String)
+- **workflow_id** (String)

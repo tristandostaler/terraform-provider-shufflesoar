@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/tristandostaler/terraform-provider-shufflesoar/client"
+	"github.com/tristandostaler/terraform-provider-shufflesoar/data_sources"
 	"github.com/tristandostaler/terraform-provider-shufflesoar/resources"
 )
 
@@ -37,8 +38,10 @@ func Provider() *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			"shufflesoar_app_authentication": resources.ResourceAppAuthentication(),
 		},
-		DataSourcesMap: map[string]*schema.Resource{},
-		ConfigureFunc:  providerConfigure,
+		DataSourcesMap: map[string]*schema.Resource{
+			"shufflesoar_all_app_authentications": data_sources.DataSourceAllAppAuthentication(),
+		},
+		ConfigureFunc: providerConfigure,
 	}
 }
 

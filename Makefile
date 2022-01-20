@@ -1,5 +1,5 @@
 TEST?=$$(go list ./... | grep -v 'vendor')
-HOSTNAME=github.com
+HOSTNAME=registry.terraform.io
 NAMESPACE=tristandostaler
 NAME=shufflesoar
 BINARY=terraform-provider-${NAME}
@@ -45,11 +45,12 @@ clean:
 	cd examples && ((rm -rf terraform.tfstate) || echo '')
 	cd examples && ((rm -rf terraform.tfstate.backup) || echo '')
 	((rm terraform-provider-shufflesoar) || echo '')
+	rm -rf /usr/share/terraform/providers/${HOSTNAME}
 
-test_clean: clean install
+test_tf_clean: clean install
 	cd examples && terraform apply -auto-approve
 
-test: install
+test_tf: install
 	cd examples && terraform apply -auto-approve
 
 doc: build

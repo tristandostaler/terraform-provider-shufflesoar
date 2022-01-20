@@ -14,83 +14,6 @@ type ShuffleClient struct {
 	APIToken string
 }
 
-type ContactInfo struct {
-	Name string
-	Url  string
-}
-
-type ReferenceInfo struct {
-	Documentation_url string
-	Github_url        string
-}
-
-type FolderMount struct {
-	Folder_mount       bool
-	Source_folder      string
-	Destination_folder string
-}
-
-type AuthenticationParameterSchema struct {
-	AuthenticationParameterSchema_type string `json:"type"`
-}
-
-type AuthenticationParameter struct {
-	Description string
-	Id          string
-	Name        string
-	Example     string
-	Multiline   bool
-	Required    bool
-	In          string
-	Schema      AuthenticationParameterSchema
-	Scheme      string
-}
-
-type Authentication struct {
-	Auth_type     string `json:"type"`
-	Required      bool
-	Parameters    []AuthenticationParameter
-	Redirect_uri  string
-	Token_uri     string
-	Refresh_uri   string
-	Client_id     string
-	Client_secret string
-}
-
-type AppAuthenticationVersion struct {
-	Version string
-	Id      string
-}
-
-type AppAuthentication struct {
-	Name       string
-	Id         string
-	LargeImage string `json:"large_image"`
-}
-
-type Field struct {
-	Key   string
-	Value string
-}
-
-type App struct {
-	App    AppAuthentication
-	Fields []Field
-	Label  string
-	Id     string
-	Active bool
-}
-
-type GetAppResponse struct {
-	Data    []App
-	Success bool
-}
-
-type CreateOrUpdateResponse struct {
-	Success bool
-	Id      string
-}
-
 func NewShuffleClient(apiToken string) (*ShuffleClient, error) {
 	return &ShuffleClient{
 		Url:      "https://shuffler.io/api/v1/apps/authentication",
@@ -136,19 +59,26 @@ func (c *ShuffleClient) DeleteAppAuth(id string) error {
 	return nil
 }
 
-func (c *ShuffleClient) GetAppAuth(id string) (App, error) {
+func (c *ShuffleClient) GetAllAppAuth() ([]App, error) {
 	body, _, err := c.makeRequest(http.MethodGet, c.Url, nil)
 	if err != nil {
-		return App{}, err
+		return []App{}, err
 	}
 
 	var responseJson GetAppResponse
 	if err := json.Unmarshal([]byte(body), &responseJson); err != nil {
 		log.Printf("[WARN] Failed to unmarshal on read: %+v", body)
+		return []App{}, err
+	}
+	return responseJson.Data, nil
+}
+
+func (c *ShuffleClient) GetAppAuthById(id string) (App, error) {
+	apps, err := c.GetAllAppAuth()
+
+	if err != nil {
 		return App{}, err
 	}
-
-	apps := responseJson.Data
 
 	for _, app := range apps {
 		if app.Id != id {
