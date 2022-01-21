@@ -39,8 +39,8 @@ func (c *ShuffleClient) CreateOrUpdateAppAuth(app App) (string, error) {
 	}
 
 	if !responseJson.Success {
-		log.Printf("[WARN] Failed to add app auth: %+v", body)
-		return "", fmt.Errorf("[WARN] Failed to add app auth: %+v", body)
+		log.Printf("[WARN] Failed to add app auth: %s", body)
+		return "", fmt.Errorf("[WARN] Failed to add app auth: %s", body)
 	}
 
 	log.Printf("[INFO] Create or Update Response: %d %s", statusCode, string(body))
