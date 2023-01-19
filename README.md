@@ -4,6 +4,7 @@ A terraform provider for https://github.com/frikky/Shuffle
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/tristandostaler)
 
 ## Using with terraform
+- You can find the documentation on terraform's website: https://registry.terraform.io/providers/tristandostaler/shufflesoar/latest
 - First, add the required provider:
 ```
 # provider.tf
