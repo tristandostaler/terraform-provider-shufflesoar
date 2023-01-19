@@ -29,6 +29,11 @@ func init() {
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
+			"shuffle_base_url": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Shuffle's base URL (i.e https://shuffler.io or https://ca.shuffler.io)",
+			},
 			"shuffle_api_token": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -46,9 +51,10 @@ func Provider() *schema.Provider {
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
+	shuffle_base_url := d.Get("shuffle_base_url").(string)
 	shuffle_api_token := d.Get("shuffle_api_token").(string)
 
-	c, _ := client.NewShuffleClient(shuffle_api_token)
+	c, _ := client.NewShuffleClient(shuffle_base_url, shuffle_api_token)
 
 	return c, nil
 }

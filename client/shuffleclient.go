@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type ShuffleClient struct {
@@ -14,9 +15,18 @@ type ShuffleClient struct {
 	APIToken string
 }
 
-func NewShuffleClient(apiToken string) (*ShuffleClient, error) {
+func NewShuffleClient(baseUrl string, apiToken string) (*ShuffleClient, error) {
+	var url string
+	apiPath := "api/v1/apps/authentication"
+	baseUrl = strings.TrimSuffix(baseUrl, "/")
+
+	if strings.HasPrefix(baseUrl, "https://") {
+		url = fmt.Sprintf("%s/%s", baseUrl, apiPath)
+	} else {
+		url = fmt.Sprintf("https://%s/%s", baseUrl, apiPath)
+	}
 	return &ShuffleClient{
-		Url:      "https://shuffler.io/api/v1/apps/authentication",
+		Url:      url,
 		APIToken: apiToken,
 	}, nil
 }

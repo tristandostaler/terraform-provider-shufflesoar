@@ -24,6 +24,7 @@ terraform {
 }
 
 provider "shufflesoar" {
+  shuffle_base_url  = var.shuffle_base_url
   shuffle_api_token = var.shuffle_api_token
 }
 ```
@@ -34,3 +35,4 @@ provider "shufflesoar" {
 ### Required
 
 - **shuffle_api_token** (String) Shuffle's API token
+- **shuffle_base_url** (String) Shuffle's base URL (i.e https://shuffler.io or https://ca.shuffler.io)
